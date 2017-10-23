@@ -1,0 +1,9 @@
+<?php
+
+$app['database.driver']   = 'pdo_mysql';
+$app['database.host']     = 'localhost';
+$app['database.port']     = '3306';
+$app['database.user']     = 'read';
+$app['database.password'] = 'read';
+$app['database.dbname']   = 's01';
+$app['basePath']          = '/share';

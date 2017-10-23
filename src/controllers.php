@@ -9,9 +9,37 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 //Request::setTrustedProxies(array('127.0.0.1'));
 
 $app->get('/', function () use ($app) {
-    return $app['twig']->render('index.html.twig', array());
+
+    /** @var \Doctrine\DBAL\Connection $db */
+    $db = $app['db'];
+
+    $photos = $db->fetchAll('
+      SELECT * FROM pictureTable pt 
+      INNER JOIN dirTable dt ON dt.iDirId = pt.iDirId
+      ORDER BY RAND() LIMIT 1
+    ');
+
+    return $app['twig']->render('index.html.twig', array('photo' => $photos[0]));
 })
 ->bind('homepage')
+;
+
+$app->get('/image/{image}', function ($image) use ($app) {
+
+    /** @var \Doctrine\DBAL\Connection $db */
+    $db = $app['db'];
+
+    $photos = $db->fetchAll('
+      SELECT * FROM pictureTable pt 
+      INNER JOIN dirTable dt ON dt.iDirId = pt.iDirId
+      WHERE iPictureId = ? 
+    ', [$image]);
+
+    $file = sprintf('%s%s%s%s%s', $app['basePath'], $photos[0]['cFullPath'], '.@__thumb/', 'default', $photos[0]['cFileName'] );
+
+    return $app->sendFile($file);
+})
+->bind('image')
 ;
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {

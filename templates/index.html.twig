@@ -1,5 +1,10 @@
 {% extends "layout.html.twig" %}
 
+{% block head %}
+    <meta http-equiv="refresh" content="5; URL={{ path('homepage') }}">
+{% endblock %}
+
 {% block content %}
-    Welcome to your new Silex Application!
+    <p>{{ photo.cDirName }} | {{ photo.cFileName }} | {{ photo.YearMonthDay }}</p>
+    <img src="{{ path('image', {'image': photo.iPictureId }) }}">
 {% endblock %}

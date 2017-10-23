@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>{% block title '' %} - My Silex Application</title>
+        <title>QNAP Gallery</title>
 
         <link href="{{ asset('css/main.css') }}" rel="stylesheet" type="text/css" />
 
@@ -16,6 +16,9 @@
                 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
             })();
         </script>
+
+        {% block head %}{% endblock %}
+
     </head>
     <body>
         {% block content %}{% endblock %}
