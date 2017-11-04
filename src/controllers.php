@@ -6,7 +6,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 //Request::setTrustedProxies(array('127.0.0.1'));
 
-$app->get('/', function () use ($app) {
+$app->get('/{limit}', function ($limit) use ($app) {
 
     /** @var \Doctrine\DBAL\Connection $db */
     $db = $app['db'];
@@ -18,13 +18,14 @@ $app->get('/', function () use ($app) {
         ->from('pictureTable', 'pt')
         ->innerJoin('pt', 'dirTable', 'dt', 'dt.iDirId = pt.iDirId')
         ->orderBy('RAND()')
-        ->setMaxResults(1);
+        ->setMaxResults($limit);
 
     $photos = $db->fetchAll($qb->getSQL());
 
-    return $app['twig']->render('index.html.twig', array('photo' => $photos[0]));
+    return $app['twig']->render('index.html.twig', array('photos' => $photos));
 })
 ->bind('homepage')
+    ->value('limit', 20)
 ;
 
 $app->get('/photos/{limit}', function ($limit) use ($app) {
@@ -49,7 +50,7 @@ $app->get('/photos/{limit}', function ($limit) use ($app) {
 ->value('limit', 20)
 ;
 
-$app->get('/image/{image}', function ($image) use ($app) {
+$app->get('/image/{image}/{size}', function ($image, $size) use ($app) {
 
     /** @var \Doctrine\DBAL\Connection $db */
     $db = $app['db'];
@@ -64,11 +65,12 @@ $app->get('/image/{image}', function ($image) use ($app) {
 
     $photos = $db->fetchAssoc($qb->getSQL(), ['image' => $image]);
 
-    $file = sprintf('%s%s%s%s%s', $app['basePath'], $photos['cFullPath'], '.@__thumb/', 'default', $photos['cFileName'] );
+    $file = sprintf('%s%s%s%s%s', $app['basePath'], $photos['cFullPath'], '.@__thumb/', $size, $photos['cFileName'] );
 
     return $app->sendFile($file);
 })
 ->bind('image')
+->value('size', 'default')
 ;
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {

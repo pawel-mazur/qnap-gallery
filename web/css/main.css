@@ -3,6 +3,13 @@ body {
     background: black;
 }
 
-p {
-    background: white;
+* {
+    color: #ffffff;
+}
+
+#lightgallery ul {
+    list-style: none;
+}
+#lightgallery li {
+    display: inline;
 }

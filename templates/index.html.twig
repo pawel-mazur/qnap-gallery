@@ -1,6 +1,35 @@
 {% extends "layout.html.twig" %}
 
+{% block head %}
+    <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.4/src/css/lightgallery.min.css" />
+{% endblock %}
+
 {% block content %}
-    <p>{{ photo.cDirName }} | {{ photo.cFileName }} | {{ photo.YearMonthDay }}</p>
-    <img src="{{ path('image', {'image': photo.iPictureId }) }}">
+
+    <ul id="lightgallery" class="list-unstyled row">
+        {% for photo in photos %}
+        <li class="col-xs-6 col-sm-4 col-md-3" data-src="{{ path('image', {'image': photo.iPictureId, 'size': 's800' }) }}" data-sub-html="{{ photo.cDirName }} | {{ photo.cFileName }} | {{ photo.YearMonthDay }}">
+            <a href="">
+                <img class="img-responsive"  src="{{ path('image', {'image': photo.iPictureId, 'size': 's100' }) }}">
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <script src="https://cdn.jsdelivr.net/combine/npm/jquery@3.2.1,npm/jquery-mousewheel@3.1.13,npm/lightgallery@1.6.4/dist/js/lightgallery-all.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#lightgallery').lightGallery({
+                showAfterLoad: true,
+                mousewheel: true,
+                controls: false,
+                closable: false,
+                autoplay: true,
+                thumbnail:true,
+            });
+            $('a').click();
+        });
+    </script>
+
 {% endblock %}
