@@ -28,6 +28,7 @@ $app->register(new Silex\Provider\DoctrineServiceProvider(), array(
         'user'     => $app['database.user'],
         'password' => $app['database.password'],
         'dbname'   => $app['database.dbname'],
+        'charset'   => $app['database.charset'],
     ]
 ));
 

@@ -1,10 +1,8 @@
 <?php
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 //Request::setTrustedProxies(array('127.0.0.1'));
 
@@ -13,15 +11,42 @@ $app->get('/', function () use ($app) {
     /** @var \Doctrine\DBAL\Connection $db */
     $db = $app['db'];
 
-    $photos = $db->fetchAll('
-      SELECT * FROM pictureTable pt 
-      INNER JOIN dirTable dt ON dt.iDirId = pt.iDirId
-      ORDER BY RAND() LIMIT 1
-    ');
+    $qb = new QueryBuilder($db);
+
+    $qb
+        ->select('*')
+        ->from('pictureTable', 'pt')
+        ->innerJoin('pt', 'dirTable', 'dt', 'dt.iDirId = pt.iDirId')
+        ->orderBy('RAND()')
+        ->setMaxResults(1);
+
+    $photos = $db->fetchAll($qb->getSQL());
 
     return $app['twig']->render('index.html.twig', array('photo' => $photos[0]));
 })
 ->bind('homepage')
+;
+
+$app->get('/photos/{limit}', function ($limit) use ($app) {
+
+    /** @var \Doctrine\DBAL\Connection $db */
+    $db = $app['db'];
+
+    $qb = new QueryBuilder($db);
+
+    $qb
+        ->select('iPictureId, cDirName, cFileName')
+        ->from('pictureTable', 'pt')
+        ->innerJoin('pt', 'dirTable', 'dt', 'dt.iDirId = pt.iDirId')
+        ->orderBy('RAND()')
+        ->setMaxResults($limit);
+
+    $photos = $db->fetchAll($qb->getSQL());
+
+    return $app->json($photos);
+})
+->bind('photos')
+->value('limit', 20)
 ;
 
 $app->get('/image/{image}', function ($image) use ($app) {
@@ -29,13 +54,17 @@ $app->get('/image/{image}', function ($image) use ($app) {
     /** @var \Doctrine\DBAL\Connection $db */
     $db = $app['db'];
 
-    $photos = $db->fetchAll('
-      SELECT * FROM pictureTable pt 
-      INNER JOIN dirTable dt ON dt.iDirId = pt.iDirId
-      WHERE iPictureId = ? 
-    ', [$image]);
+    $qb = new QueryBuilder($db);
 
-    $file = sprintf('%s%s%s%s%s', $app['basePath'], $photos[0]['cFullPath'], '.@__thumb/', 'default', $photos[0]['cFileName'] );
+    $qb
+        ->select('*')
+        ->from('pictureTable', 'pt')
+        ->innerJoin('pt', 'dirTable', 'dt', 'dt.iDirId = pt.iDirId')
+        ->where('pt.iPictureId = :image');
+
+    $photos = $db->fetchAssoc($qb->getSQL(), ['image' => $image]);
+
+    $file = sprintf('%s%s%s%s%s', $app['basePath'], $photos['cFullPath'], '.@__thumb/', 'default', $photos['cFileName'] );
 
     return $app->sendFile($file);
 })
