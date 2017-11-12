@@ -7,9 +7,6 @@ body {
     color: #ffffff;
 }
 
-#lightgallery ul {
-    list-style: none;
-}
-#lightgallery li {
-    display: inline;
+.lg-dropdown-text {
+    color: #333333;
 }

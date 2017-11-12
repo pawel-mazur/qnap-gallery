@@ -6,29 +6,42 @@
 
 {% block content %}
 
-    <ul id="lightgallery" class="list-unstyled row">
-        {% for photo in photos %}
-        <li class="col-xs-6 col-sm-4 col-md-3" data-src="{{ path('image', {'image': photo.iPictureId, 'size': 's800' }) }}" data-sub-html="{{ photo.cDirName }} | {{ photo.cFileName }} | {{ photo.YearMonthDay }}">
-            <a href="">
-                <img class="img-responsive"  src="{{ path('image', {'image': photo.iPictureId, 'size': 's100' }) }}">
-            </a>
-        </li>
-        {% endfor %}
-    </ul>
+    <div id="light-gallery"></div>
 
     <script src="https://cdn.jsdelivr.net/combine/npm/jquery@3.2.1,npm/jquery-mousewheel@3.1.13,npm/lightgallery@1.6.4/dist/js/lightgallery-all.min.js"></script>
 
     <script type="text/javascript">
         $(document).ready(function(){
-            $('#lightgallery').lightGallery({
-                showAfterLoad: true,
-                mousewheel: true,
-                controls: false,
-                closable: false,
-                autoplay: true,
-                thumbnail:true,
+
+            jQuery.ajax("{{ url('photos', {limit: limit}) }}").done(function (data){
+
+                var photos = [];
+
+                jQuery.each(data, function(index, photo){
+                    photos.push({
+                        'src': photo.image_url_big,
+                        'thumb': photo.image_url_thumb,
+                        'subHtml': photo.cDirName + ' | ' + photo.cFileName + ' | ' + photo.YearMonthDay
+                    })
+                });
+
+                var lightGallery = $('#light-gallery').lightGallery({
+                    fullScreen: true,
+                    mousewheel: true,
+                    controls:   false,
+                    closable:   true,
+                    autoplay:   true,
+                    thumbnail:  true,
+                    dynamic:    true,
+                    dynamicEl:  photos
+                });
+
+
+                lightGallery.on('onBeforeClose.lg', function (event, index) {
+                    throw 500;
+                });
+
             });
-            $('a').click();
         });
     </script>
 

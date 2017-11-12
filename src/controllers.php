@@ -1,42 +1,32 @@
 <?php
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 //Request::setTrustedProxies(array('127.0.0.1'));
 
 $app->get('/{limit}', function ($limit) use ($app) {
 
-    /** @var \Doctrine\DBAL\Connection $db */
-    $db = $app['db'];
-
-    $qb = new QueryBuilder($db);
-
-    $qb
-        ->select('*')
-        ->from('pictureTable', 'pt')
-        ->innerJoin('pt', 'dirTable', 'dt', 'dt.iDirId = pt.iDirId')
-        ->orderBy('RAND()')
-        ->setMaxResults($limit);
-
-    $photos = $db->fetchAll($qb->getSQL());
-
-    return $app['twig']->render('index.html.twig', array('photos' => $photos));
+    return $app['twig']->render('index.html.twig', array('limit' => $limit));
 })
 ->bind('homepage')
-    ->value('limit', 20)
+    ->value('limit', $app['default_photos'])
+    ->assert('limit', '\d+')
 ;
 
 $app->get('/photos/{limit}', function ($limit) use ($app) {
 
-    /** @var \Doctrine\DBAL\Connection $db */
+    /** @var Connection $db */
     $db = $app['db'];
 
     $qb = new QueryBuilder($db);
 
     $qb
-        ->select('iPictureId, cDirName, cFileName')
+        ->select('iPictureId, cDirName, cFileName, YearMonthDay')
         ->from('pictureTable', 'pt')
         ->innerJoin('pt', 'dirTable', 'dt', 'dt.iDirId = pt.iDirId')
         ->orderBy('RAND()')
@@ -44,15 +34,26 @@ $app->get('/photos/{limit}', function ($limit) use ($app) {
 
     $photos = $db->fetchAll($qb->getSQL());
 
+    foreach ($photos as &$photo) {
+
+        /** @var UrlGeneratorInterface $generator */
+        $generator = $app['url_generator'];
+
+        $photo['image_url_thumb'] = $generator->generate('image', ['image' => $photo['iPictureId'], 'size' => 's100'], UrlGeneratorInterface::ABSOLUTE_URL);
+        $photo['image_url_small'] = $generator->generate('image', ['image' => $photo['iPictureId'], 'size' => 'default'], UrlGeneratorInterface::ABSOLUTE_URL);
+        $photo['image_url_big'] = $generator->generate('image', ['image' => $photo['iPictureId'], 'size' => 's800'], UrlGeneratorInterface::ABSOLUTE_URL);
+    }
+
     return $app->json($photos);
 })
 ->bind('photos')
-->value('limit', 20)
+    ->value('limit', $app['default_photos'])
+    ->assert('limit', '\d+')
 ;
 
 $app->get('/image/{image}/{size}', function ($image, $size) use ($app) {
 
-    /** @var \Doctrine\DBAL\Connection $db */
+    /** @var Connection $db */
     $db = $app['db'];
 
     $qb = new QueryBuilder($db);
@@ -61,16 +62,27 @@ $app->get('/image/{image}/{size}', function ($image, $size) use ($app) {
         ->select('*')
         ->from('pictureTable', 'pt')
         ->innerJoin('pt', 'dirTable', 'dt', 'dt.iDirId = pt.iDirId')
-        ->where('pt.iPictureId = :image');
+        ->setMaxResults(1);
 
-    $photos = $db->fetchAssoc($qb->getSQL(), ['image' => $image]);
+    if ('rand' !== $image) {
+        $qb->where('pt.iPictureId = :image');
+        $photo = $db->fetchAssoc($qb->getSQL(), ['image' => $image]);
+    } else {
+        $qb->orderBy('RAND()');
+        $photo = $db->fetchAssoc($qb->getSQL());
+    }
 
-    $file = sprintf('%s%s%s%s%s', $app['basePath'], $photos['cFullPath'], '.@__thumb/', $size, $photos['cFileName'] );
+    if (false === $photo) throw new NotFoundHttpException('Photo not found');
+
+    $file = sprintf('%s%s%s%s%s', $app['basePath'], $photo['cFullPath'], '.@__thumb/', $size, $photo['cFileName'] );
 
     return $app->sendFile($file);
 })
 ->bind('image')
-->value('size', 'default')
+    ->value('image', 'rand')
+    ->assert('image', '^rand$|\d+')
+    ->value('size', 'default')
+    ->assert('size', '^(default|s100|s800)$')
 ;
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {

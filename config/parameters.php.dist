@@ -8,3 +8,4 @@ $app['database.password'] = 'read';
 $app['database.dbname']   = 's01';
 $app['database.charset']  = 'utf8';
 $app['basePath']          = '/share/';
+$app['default_photos']    = '100';
