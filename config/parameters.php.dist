@@ -7,5 +7,9 @@ $app['database.user']     = 'read';
 $app['database.password'] = 'read';
 $app['database.dbname']   = 's01';
 $app['database.charset']  = 'utf8';
+
 $app['basePath']          = '/share/';
 $app['default_photos']    = '100';
+
+$app['security.user']     = 'admin';
+$app['security.password'] = '$2y$10$3i9/lVd8UOFIJ6PAMFt8gu3/r5g0qeCJvoSlLCsvMTythye19F77a';

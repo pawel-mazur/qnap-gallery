@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "f54bb5099c1027d7c922ab9345169200",
+    "content-hash": "501b78baa8167326bc90e449074bddaa",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -2468,16 +2468,16 @@
         },
         {
             "name": "symfony/security",
-            "version": "v3.3.10",
+            "version": "v3.3.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/security.git",
-                "reference": "bc02243d4b09d42b636c89d7ff3c41edd5af0100"
+                "reference": "0b012b9dd7cdeaadbbfd75e9fec835bb63fd4321"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/security/zipball/bc02243d4b09d42b636c89d7ff3c41edd5af0100",
-                "reference": "bc02243d4b09d42b636c89d7ff3c41edd5af0100",
+                "url": "https://api.github.com/repos/symfony/security/zipball/0b012b9dd7cdeaadbbfd75e9fec835bb63fd4321",
+                "reference": "0b012b9dd7cdeaadbbfd75e9fec835bb63fd4321",
                 "shasum": ""
             },
             "require": {
@@ -2542,7 +2542,7 @@
             ],
             "description": "Symfony Security Component",
             "homepage": "https://symfony.com",
-            "time": "2017-10-02T06:42:24+00:00"
+            "time": "2017-11-07T14:16:22+00:00"
         },
         {
             "name": "symfony/stopwatch",
