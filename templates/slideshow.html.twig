@@ -13,7 +13,7 @@
     <script type="text/javascript">
         $(document).ready(function(){
 
-            jQuery.ajax("{{ url('photos', {limit: limit}) }}").done(function (data){
+            jQuery.ajax("{{ url('photos', {album: album, limit: limit}) }}").done(function (data){
 
                 var photos = [];
 
